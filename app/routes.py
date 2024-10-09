@@ -3,23 +3,11 @@ from . import db
 from .models import Job
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
-from marshmallow import Schema, fields, ValidationError
+from .schemas import JobSchema
 from sqlalchemy import text
+from marshmallow import ValidationError
 
 main = Blueprint('main', __name__)
-
-# Define Marshmallow Schema for Job Validation
-class JobSchema(Schema):
-    id = fields.Int(dump_only=True)
-    title = fields.Str(required=True, validate=lambda x: len(x) > 0)
-    company = fields.Str(required=True, validate=lambda x: len(x) > 0)
-    location = fields.Str(required=True, validate=lambda x: len(x) > 0)
-    description = fields.Str(required=True, validate=lambda x: len(x) > 0)
-    salary = fields.Str()
-    employment_type = fields.Str()
-    application_deadline = fields.DateTime()
-    skills_required = fields.Str()
-    date_posted = fields.DateTime(dump_only=True)
 
 job_schema = JobSchema()
 jobs_schema = JobSchema(many=True)
@@ -43,7 +31,7 @@ def create_job():
         employment_type=job_data.get('employment_type'),
         application_deadline=job_data.get('application_deadline'),
         skills_required=job_data.get('skills_required'),
-        date_posted=datetime.now(timezone.utc)  # Automatically set to current UTC time
+        date_posted=datetime.now(timezone.utc) 
     )
     try:
         db.session.add(job)
@@ -52,17 +40,17 @@ def create_job():
         db.session.rollback()
         abort(500, description="Database integrity error")
     
-    return job_schema.dump(job), 201  # Use dump instead of jsonify
+    return job_schema.dump(job), 201 
 
 @main.route('/api/jobs', methods=['GET'])
 def get_jobs():
     jobs = Job.query.order_by(Job.date_posted.desc()).all()
-    return jobs_schema.dump(jobs), 200  # Use dump instead of jsonify
+    return jobs_schema.dump(jobs), 200  
 
 @main.route('/api/jobs/<int:job_id>', methods=['GET'])
 def get_job(job_id):
     job = Job.query.get_or_404(job_id, description=f"Job with id {job_id} not found")
-    return job_schema.dump(job), 200  # Use dump instead of jsonify
+    return job_schema.dump(job), 200  
 
 @main.route('/api/jobs/<int:job_id>', methods=['PUT'])
 def update_job(job_id):
@@ -71,7 +59,7 @@ def update_job(job_id):
         abort(400, description="Request must be JSON")
     try:
         data = request.get_json()
-        # Prevent clients from modifying 'date_posted'
+        
         if 'date_posted' in data:
             abort(400, description="Cannot modify 'date_posted' field")
         job_data = job_schema.load(data, partial=True)
@@ -87,7 +75,7 @@ def update_job(job_id):
         db.session.rollback()
         abort(500, description="Database integrity error")
     
-    return job_schema.dump(job), 200  # Use dump instead of jsonify
+    return job_schema.dump(job), 200  
 
 @main.route('/api/jobs/<int:job_id>', methods=['DELETE'])
 def delete_job(job_id):
