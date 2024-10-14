@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from . import db
-from .models import Job
+from .job_model import Job
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 from .schemas import JobSchema
