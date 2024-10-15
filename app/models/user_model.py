@@ -1,4 +1,4 @@
-from . import db
+from .. import db
 from sqlalchemy import Column, Integer, String, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -10,6 +10,8 @@ class User(db.Model):
     email = Column(String(120), unique=True, index=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
     profile_picture = Column(String(255), nullable=True)
+
+    applications = db.relationship('Application', back_populates='user', cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Hash and set the user's password."""

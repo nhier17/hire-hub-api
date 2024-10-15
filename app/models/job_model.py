@@ -1,4 +1,4 @@
-from . import db
+from .. import db
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from datetime import datetime, timezone
 
@@ -16,6 +16,8 @@ class Job(db.Model):
     employment_type = Column(String(50))
     application_deadline = Column(DateTime)
     skills_required = Column(String(200))
+
+    applications = db.relationship('Application', back_populates='job', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
