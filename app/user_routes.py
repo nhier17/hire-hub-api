@@ -63,10 +63,10 @@ def login():
 
     # Fetch user by email
     user = User.query.filter_by(email=login_data['email']).first()
-    if not user or not User.check_password(login_data['password']):
+    if not user or not user.check_password(login_data['password']):
         return jsonify({"message": "Invalid credentials."}), 401
 
     # Create JWT token
-    access_token = create_access_token(identity={"user_id":User.id}, expires_delta=timedelta(days=1))
+    access_token = create_access_token(identity={"user_id":user.id}, expires_delta=timedelta(days=1))
 
     return jsonify({"access_token": access_token}), 200
