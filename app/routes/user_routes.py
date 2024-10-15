@@ -46,7 +46,6 @@ def register():
         db.session.rollback()
         return jsonify({"message": "Database Integrity Error."}), 500
 
-    # Respond with the created user's data (excluding password)
     return jsonify(new_user.to_dict()), 201
 
 @user_blueprint.route('/api/auth/login', methods=['POST'])
@@ -69,4 +68,11 @@ def login():
     # Create JWT token
     access_token = create_access_token(identity={"user_id":user.id}, expires_delta=timedelta(days=1))
 
-    return jsonify({"access_token": access_token}), 200
+    return jsonify({"access_token": access_token,
+                    "user": {
+                        "id": user.id,
+                        "name": user.name,
+                        "email": user.email,
+                        "profile_picture": user.profile_picture
+                    }
+                     }), 200
