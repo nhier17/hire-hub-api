@@ -16,7 +16,7 @@ login_schema = UserLoginSchema()
 @user_blueprint.route('/api/auth/register', methods=['POST'])
 def register():
     """
-    Register a new user.
+    Register a new user and return a JWT access token along with user information.
     """
     try:
         # Parse and validate input
@@ -39,14 +39,25 @@ def register():
     new_user.set_password(user_data['password'])
 
     try:
-        # Add and commit the new user to the database
         db.session.add(new_user)
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
         return jsonify({"message": "Database Integrity Error."}), 500
 
-    return jsonify(new_user.to_dict()), 201
+    # Create a JWT token for the new user
+    access_token = create_access_token(identity={"user_id": new_user.id}, expires_delta=timedelta(days=1))
+
+    return jsonify({
+        "access_token": access_token,
+        "user": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email,
+            "profile_picture": new_user.profile_picture
+        }
+    }), 201
+
 
 @user_blueprint.route('/api/auth/login', methods=['POST'])
 def login():
