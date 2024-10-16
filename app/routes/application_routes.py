@@ -42,7 +42,9 @@ def apply_for_job():
     if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
         return jsonify({"message": "Invalid file type."}), 400
 
-    resume_path = os.path.join(current_app.config['UPLOAD_PATH'], filename)
+    current_user_id = get_jwt_identity()['user_id']
+    unique_filename = f"user_{current_user_id}_job_{application_data['job_id']}_{filename}"
+    resume_path = os.path.join(current_app.config['UPLOAD_PATH'], unique_filename)
     resume.save(resume_path)
 
     # Get current user ID
