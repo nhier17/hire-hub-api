@@ -20,17 +20,14 @@ def create_app(config_class=Config):
     jwt.init_app(app)
 
     # import models
-    from .models.job_model import Job
-    from .models.user_model import User
-    from .models.application_model import Application
+    from .models import Job, User, Application
+
 
     # Enable CORS for API routes
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # Register blueprints 
-    from .routes.job_routes import main as main_blueprint
-    from .routes.user_routes import user_blueprint
-    from .routes.application_routes import application_blueprint
+    from .routes import main as main_blueprint, user_blueprint, application_blueprint
 
     app.register_blueprint(main_blueprint)
     app.register_blueprint(user_blueprint)

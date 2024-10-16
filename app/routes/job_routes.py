@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request, abort
 from .. import db
-from ..models.job_model import Job
+from ..models import Job
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
-from ..schemas.job_schemas import JobSchema
+from ..schemas import JobSchema
 from sqlalchemy import text
 from marshmallow import ValidationError
 

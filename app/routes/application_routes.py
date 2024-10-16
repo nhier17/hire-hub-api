@@ -2,9 +2,12 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from marshmallow import ValidationError
+from werkzeug.utils import secure_filename
+import os
+
 from .. import db
-from ..models.application_model import Application
-from ..schemas.application_schemas import ApplicationCreateSchema, ApplicationResponseSchema
+from ..models import Application
+from ..schemas import ApplicationCreateSchema, ApplicationResponseSchema
 
 application_blueprint = Blueprint('applications', __name__)
 
@@ -19,18 +22,35 @@ def apply_for_job():
     Apply for a job.
     """
     try:
-        # Parse and validate input
-        data = request.get_json()
-        application_data = application_create_schema.load(data)
+        # Validate form data
+        form = request.form
+        application_data = application_create_schema.load(form)
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 400
 
+    # Handle resume upload
+    if 'resume' not in request.files:
+        return jsonify({"message": "Resume file is required."}), 400
+
+    resume = request.files['resume']
+    if resume.filename == '':
+        return jsonify({"message": "No selected file."}), 400
+
+    filename = secure_filename(resume.filename)
+    file_ext = os.path.splitext(filename)[1].lower()
+
+    if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+        return jsonify({"message": "Invalid file type."}), 400
+
+    resume_path = os.path.join(current_app.config['UPLOAD_PATH'], filename)
+    resume.save(resume_path)
+
+    # Get current user ID
     current_user_id = get_jwt_identity()['user_id']
     job_id = application_data['job_id']
-    cover_letter = application_data.get('cover_letter', '')
 
     # Check if job exists
-    job = db.session.query(Application.job).filter(Application.job_id == job_id).first()
+    job = Application.job.property.mapper.class_.query.get(job_id)
     if not job:
         return jsonify({"message": "Job not found"}), 404
 
@@ -40,7 +60,20 @@ def apply_for_job():
         return jsonify({"message": "You have already applied for this job"}), 400
 
     # Create new application
-    new_application = Application(user_id=current_user_id, job_id=job_id, cover_letter=cover_letter)
+    new_application = Application(
+        user_id=current_user_id,
+        job_id=job_id,
+        full_name=application_data['full_name'],
+        email=application_data['email'],
+        phone_number=application_data['phone_number'],
+        resume=resume_path,
+        portfolio=application_data.get('portfolio'),
+        country_of_residence=application_data['country_of_residence'],
+        notice_period=application_data['notice_period'],
+        salary_expectation=application_data['salary_expectation'],
+        years_of_experience=application_data['years_of_experience'],
+        cover_letter=application_data.get('cover_letter')
+    )
 
     try:
         db.session.add(new_application)

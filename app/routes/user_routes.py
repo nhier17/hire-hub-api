@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from .. import db
-from ..models.user_model import User
-from ..schemas.user_schemas import UserRegistrationSchema, UserLoginSchema
+from ..models import User
+from ..schemas import UserRegistrationSchema, UserLoginSchema
 from sqlalchemy.exc import IntegrityError
 from marshmallow import ValidationError
 from flask_jwt_extended import create_access_token
