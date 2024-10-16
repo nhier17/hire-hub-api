@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from marshmallow import ValidationError
@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 import os
 
 from .. import db
-from ..models import Application
+from ..models import Application, Job
 from ..schemas import ApplicationCreateSchema, ApplicationResponseSchema
 
 application_blueprint = Blueprint('applications', __name__)
@@ -50,7 +50,7 @@ def apply_for_job():
     job_id = application_data['job_id']
 
     # Check if job exists
-    job = Application.job.property.mapper.class_.query.get(job_id)
+    job = Job.query.get(job_id)
     if not job:
         return jsonify({"message": "Job not found"}), 404
 
