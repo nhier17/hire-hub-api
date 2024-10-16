@@ -4,15 +4,15 @@ from .job_schemas import JobSchema
 
 class ApplicationCreateSchema(Schema):
     job_id = fields.Integer(required=True)
-    full_name = fields.String(required=True, validate=validate.Length(max=100))
+    full_name = fields.String(required=True, validate=validate.Length(max=20))
     email = fields.Email(required=True, validate=validate.Length(max=120))
     phone_number = fields.String(required=True, validate=validate.Length(max=20))
     resume = fields.Raw(required=True)  
     portfolio = fields.String(required=False, validate=validate.Length(max=255))
     country_of_residence = fields.String(required=True, validate=validate.Length(max=100))
-    notice_period = fields.String(required=True, validate=validate.Range(min=0))
+    notice_period = fields.String(required=True, validate=validate.Length(max=20))
     salary_expectation = fields.Integer(required=True, validate=validate.Range(min=0))
-    years_of_experience = fields.String(required=True, validate=validate.Range(min=0))
+    years_of_experience = fields.String(required=True, validate=validate.Length(max=20))
     cover_letter = fields.String(required=False, allow_none=True, validate=validate.Length(max=2000))
     
     @validates('job_id')
