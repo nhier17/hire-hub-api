@@ -7,17 +7,17 @@ class ApplicationCreateSchema(Schema):
     full_name = fields.String(required=True, validate=validate.Length(max=100))
     email = fields.Email(required=True, validate=validate.Length(max=120))
     phone_number = fields.String(required=True, validate=validate.Length(max=20))
-    resume = fields.Raw(required=True)  # For file uploads
+    resume = fields.Raw(required=True)  
     portfolio = fields.String(required=False, validate=validate.Length(max=255))
     country_of_residence = fields.String(required=True, validate=validate.Length(max=100))
-    notice_period = fields.Integer(required=True, validate=validate.Range(min=0))
+    notice_period = fields.String(required=True, validate=validate.Range(min=0))
     salary_expectation = fields.Integer(required=True, validate=validate.Range(min=0))
-    years_of_experience = fields.Integer(required=True, validate=validate.Range(min=0))
+    years_of_experience = fields.String(required=True, validate=validate.Range(min=0))
     cover_letter = fields.String(required=False, allow_none=True, validate=validate.Length(max=2000))
     
     @validates('job_id')
     def validate_job_id(self, value):
-        from app.models.job_model import Job
+        from ..models import Job
         if not Job.query.get(value):
             raise ValidationError('Job with the given ID does not exist.')
 
@@ -31,8 +31,8 @@ class ApplicationResponseSchema(Schema):
     resume = fields.String()
     portfolio = fields.String()
     country_of_residence = fields.String()
-    notice_period = fields.Integer()
+    notice_period = fields.String()
     salary_expectation = fields.Integer()
-    years_of_experience = fields.Integer()
+    years_of_experience = fields.String()
     date_applied = fields.DateTime()
     cover_letter = fields.String()

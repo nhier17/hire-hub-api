@@ -15,8 +15,8 @@ class Application(db.Model):
     portfolio = Column(String(255), nullable=True)  
     country_of_residence = Column(String(100), nullable=False)
     notice_period = Column(Integer, nullable=False)  
-    salary_expectation = Column(Integer, nullable=False)  
-    years_of_experience = Column(Integer, nullable=False)
+    salary_expectation = Column(String, nullable=False)  
+    years_of_experience = Column(String, nullable=False)
     date_applied = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     cover_letter = Column(Text, nullable=True)
 
