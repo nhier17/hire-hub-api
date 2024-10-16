@@ -23,7 +23,7 @@ def apply_for_job():
     """
     try:
         # Validate form data
-        form = request.form
+        form = request.form.to_dict()
         application_data = application_create_schema.load(form)
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 400
