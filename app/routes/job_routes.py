@@ -47,6 +47,13 @@ def get_jobs():
     jobs = Job.query.order_by(Job.date_posted.desc()).all()
     return jobs_schema.dump(jobs), 200  
 
+
+@main.route('/api/jobs/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    job = Job.query.get_or_404(job_id, description=f"Job with id {job_id} not found")
+    return job_schema.dump(job), 200
+
+
 @main.route('/api/jobs/<int:job_id>', methods=['GET'])
 def get_job(job_id):
     job = Job.query.get_or_404(job_id, description=f"Job with id {job_id} not found")
