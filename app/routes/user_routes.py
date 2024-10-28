@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from .. import db
 from ..models import User
-from ..schemas import UserRegistrationSchema, UserLoginSchema
+from ..schemas import UserRegistrationSchema, UserLoginSchema, UserSchema
 from sqlalchemy.exc import IntegrityError
 from marshmallow import ValidationError
 from flask_jwt_extended import create_access_token
@@ -10,6 +10,7 @@ from datetime import timedelta
 
 user_blueprint = Blueprint('users', __name__)
 
+user_schema  = UserSchema()
 registration_schema = UserRegistrationSchema()
 login_schema = UserLoginSchema()
 
@@ -87,3 +88,10 @@ def login():
                         "profile_picture": user.profile_picture
                     }
                      }), 200
+# get users
+
+@user_blueprint.route('/api/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    result = user_schema.dump(users, many=True)
+    return jsonify(result), 200

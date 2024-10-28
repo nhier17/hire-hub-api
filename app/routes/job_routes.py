@@ -44,8 +44,32 @@ def create_job():
 
 @main.route('/api/jobs', methods=['GET'])
 def get_jobs():
-    jobs = Job.query.order_by(Job.date_posted.desc()).all()
-    return jobs_schema.dump(jobs), 200  
+    search = request.args.get('search', '', type=str)
+    location = request.args.get('location', '', type=str)
+    company = request.args.get('company', '', type=str)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    query = Job.query
+
+    if search:
+        query = query.filter(Job.title.ilike(f'%{search}%'))
+    
+    if location:
+        query = query.filter(Job.location.ilike(f'%{location}%'))
+    
+    if company:
+        query = query.filter(Job.company.ilike(f'%{company}%'))
+    
+    jobs_pagination = query.order_by(Job.date_posted.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    jobs = jobs_pagination.items
+
+    return jsonify({
+        'jobs': jobs_schema.dump(jobs),
+        'total': jobs_pagination.total,
+        'pages': jobs_pagination.pages,
+        'current_page': jobs_pagination.page
+    }), 200
 
 
 
