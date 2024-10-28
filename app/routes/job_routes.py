@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from ..schemas import JobSchema
 from sqlalchemy import text
 from marshmallow import ValidationError
+from flasgger import swag_from
 
 main = Blueprint('main', __name__)
 
@@ -43,6 +44,27 @@ def create_job():
     return job_schema.dump(job), 201 
 
 @main.route('/api/jobs', methods=['GET'])
+@swag_from({
+    'parameters': [
+        {'name': 'search', 'in': 'query', 'type': 'string', 'description': 'Job title or keyword'},
+        {'name': 'location', 'in': 'query', 'type': 'string', 'description': 'Location to filter jobs by'},
+        {'name': 'page', 'in': 'query', 'type': 'integer', 'default': 1, 'description': 'Pagination page number'},
+        {'name': 'per_page', 'in': 'query', 'type': 'integer', 'default': 10, 'description': 'Items per page'}
+    ],
+    'responses': {
+        200: {
+            'description': 'List of job results',
+            'examples': {
+                'application/json': {
+                    'jobs': [{'id': 1, 'title': 'Software Engineer'}],
+                    'total': 100,
+                    'pages': 10,
+                    'current_page': 1
+                }
+            }
+        }
+    }
+})
 def get_jobs():
     search = request.args.get('search', '', type=str)
     location = request.args.get('location', '', type=str)
